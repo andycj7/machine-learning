@@ -76,7 +76,12 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>F:\matlab\bin\win64;F:\matlab\extern\include;$(IncludePath)</IncludePath>
+    <LibraryPath>F:\matlab\bin\win64;F:\matlab\extern\lib;F:\matlab\extern\lib\win64\microsoft;$(LibraryPath)</LibraryPath>
+    <ExecutablePath>F:\matlab\bin\win64;$(ExecutablePath)</ExecutablePath>
+    <LibraryWPath>F:\matlab\bin\win64;$(LibraryWPath)</LibraryWPath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
