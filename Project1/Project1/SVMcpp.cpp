@@ -14,6 +14,7 @@ SVM::~SVM()
 }
 
 //d中为样本,每个样本按行存储; l标签(1或-1); sn样本个数; fn特征个数
+//alpha 拉普拉斯乘子 初始化为0 gx 初始化为0
 void SVM::initialize(double *d, double *l, int sn, int fn)
 {
 	this->sampleNum = sn;
@@ -122,7 +123,7 @@ void SVM::computeGx()
 		{
 			gx[i] += alpha[j] * label[j] * kernel(i, j);
 		}
-		gx[i] += b;
+		gx[i] += b; //对样本预测值的输出
 	}
 }
 
@@ -189,6 +190,7 @@ int SVM::secondAlpha(int a1)
 }
 
 //选定a1和a2，进行更新
+//a1和a2是选定的第几个变量
 bool SVM::takeStep(int a1, int a2)
 {
 	if (a1 < -eps) return false;
@@ -210,9 +212,13 @@ bool SVM::takeStep(int a1, int a2)
 		if (alpha[a2] < L) alpha[a2] = L;
 		else if (alpha[a2] > H) alpha[a2] = H;
 	}
-	else//我也不知道为什么这么算，我抄的论文里的,意思是选到超平面距离近的边界
+	else
+    //二次函数二次项的系数eta<=0
+	//此时所要求的最小值都在边界上
 	{
 		alpha[a2] = L;
+		//计算要求的二次函数的值
+		//具体实现有点懵
 		double Lobj = objFun(a2);
 		alpha[a2] = H;
 		double Hobj = objFun(a2);
@@ -282,10 +288,11 @@ void SVM::SMO()
 				}
 				Changed = false;
 			}
+			//0<alpha<C
 			if (alpha[i] > eps && alpha[i] < C - eps)
 			{
 				a1 = i;
-				//不满足KKT条件
+				//不满足KKT条件，当条件小于eps即约等于0
 				if (fabs(label[i] * gx[i] - 1) > eps)
 				{
 					//选择第二个变量，优先选下降最多的
@@ -338,6 +345,9 @@ void SVM::SMO()
 		for (int i = 0; i < sampleNum; i++)
 		{
 			a1 = i;
+		    //违反的KKT条件:alpha=C&&y*f(x)-1<0||alpha=0&&y*f(x)-1>0
+			//这样才能保证原问题的最小值
+			//加上最大的负项或加上最小的正项
 			if (fabs(alpha[i]) < eps && label[i] * gx[i] < 1 ||
 				fabs(alpha[i] - C) < eps && label[i] * gx[i] > 1)
 			{
