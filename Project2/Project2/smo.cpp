@@ -123,7 +123,7 @@ int examineExample(int i1)
 	KKT condition:
 	    if alphi == 0, yi*Ei >= 0;
         if 0 < alphi < C, yi*Ei == 0;
-		if alphi == 0, yi*Ei <= 0;
+		if alphi == C, yi*Ei <= 0;
 	*/
 	/*
 	The SMO algorithm is based on the evaluation of the KKT conditions. When every multiplier 
@@ -135,6 +135,7 @@ int examineExample(int i1)
 		hierarchy one：在non-bound乘子中寻找maximum fabs(E1-E2)的样本
 		hierarchy two：如果上面没取得进展,那么从随机位置查找non-boundary 样本
 		hierarchy three：如果上面也失败，则从随机位置查找整个样本,改为bound样本
+		以上方法 非边界值优先 其次再随机选取一个边界值
 		*/
 		if (examineFirstChoice(i1,E1))//hierarchy one
 		{
@@ -239,6 +240,7 @@ int examineBound(int i1)
   	 for (k = 0; k < end_support_i; k++)
   	 {
 		 i2 = (k + k0) % end_support_i;//从随机位开始
+		 //下面作为边界值的判定 被注释 但我认为本身的边界判断就是有误的
 		 //if (alph[i2]= 0.0 || alph[i2]=C)//修改****************************************************
 		 {
 			 if (takeStep(i1, i2))//As soon as there has positive progress, return 1.
@@ -270,7 +272,7 @@ int takeStep(int i1,int i2)
 	y1=target[i1];
 	y2=target[i2];
 	if(alph1>0&&alph1<C)
-		E1=error_cache[i1];
+		E1=error_cache[i1];//当作为非边界值 即他在支持向量上 与标签值的误差就是为0
 	else
 		E1=learned_func(i1)-y1;//learned_func(int)为非线性的评价函数，即输出函数
 	if(alph2>0&&alph2<C)
@@ -403,11 +405,11 @@ int takeStep(int i1,int i2)
 	//对于线性情况，要更新权向量，这里不用了
 	//更新error_cache，对取得进展的a1,a2,所对应的i1,i2的error_cache[i1]=error_cache[i2]=0
 	{
-		double t1=y1*(a1-alph1);
+		double t1=y1*(a1-alph1);//两个乘子(新值-旧值)*标签值
 		double t2=y2*(a2-alph2);
-		for(int i=0;i<end_support_i;i++)
+		for(int i=0;i<end_support_i;i++)//对于所有的alph中的非边界位置 进行误差更新
 		{
-			if(0<alph[i]&&alph[i]<C)
+			if(0<alph[i]&&alph[i]<C)//非边界值 对应的E 看不懂 所谓的更新
 			{
 				/*
 				Whenever a joint optimization occurs, the cached errors for all non-bound
