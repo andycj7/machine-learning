@@ -219,6 +219,8 @@ bool SVM::takeStep(int a1, int a2)
 		alpha[a2] = L;
 		//计算要求的二次函数的值
 		//具体实现有点懵
+		//objFun中 按顺序选取了一个0<alpha[i]<c的一个位置当作位置a1 来作为更新 
+		//为什么不用已经选取的值呢
 		double Lobj = objFun(a2);
 		alpha[a2] = H;
 		double Hobj = objFun(a2);

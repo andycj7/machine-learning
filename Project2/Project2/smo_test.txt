@@ -1,0 +1,3 @@
+---------------²âÊÔ½á¹û-----------------
+tp=0   tn=0  fp=0  fn=0
+ming=-nan(ind)  te=-nan(ind)  total_q=-nan(ind)
