@@ -318,8 +318,8 @@ int takeStep(int i1,int i2)
 	k11=kernel_func(i1,i1);//kernel_func(int,int)为核函数
 	k22=kernel_func(i2,i2);
 	k12=kernel_func(i1,i2);
-	eta=2*k12-k11-k22;//eta是<=0的。
-	if(eta<0)
+	eta=2*k12-k11-k22;//eta是<=0的。//这边与推导的时候相反k11+k22-2*k12
+	if(eta<0)//二项开口为向上的
 	{
 		a2=alph2-y2*(E1-E2)/eta;//计算新的alph2
 		//调整a2，使其处于可行域
@@ -358,15 +358,18 @@ int takeStep(int i1,int i2)
 	/***********************************
     计算新的a1
 	***********************************/
-	a1=alph1-s*(a2-alph2);
-	if(a1<0)//调整a1,使其符合条件*****??????????????????????????????????????????
+	a1=alph1-s*(a2-alph2);//更新a1新值的公式 a1_new*y1+a2_new*y2=a1_old*y1+a2_old*y2
+	if(a1<0)//调整a1,使其符合条件//此时算出的a1一定为边界点的a1 (0,C)//a2一定 (0,C)
 	{
-		a2+=s*a1;
+		a2+=s*a1;//a1=0 s*a2_new=s*a2_old+a1_old
+		         //a2_new=a2_old+s*a1_old
 		a1=0;
 	}
 	else if(a1>C)
 	{
-		double t=a1-C;
+		double t=a1-C;//C=a1_old-s*(a2_new-a2_old)
+		              //a2_new=a2_old+s*(a1_old-C)
+		              //好像是这样的 但是对新值和旧值的选择不清楚
 		a2+=s*t;
 		a1=C;
 	}
@@ -377,6 +380,7 @@ int takeStep(int i1,int i2)
 		if(a1>0&&a1<C)
 		{
 			bnew=b+E1 + y1*(a1-alph1)*k11 + y2*(a2-alph2)*k12;
+			//程序中的b与论文中的不一样 好像是y=wTx-b 与论文中的分析相反
 		    //The above threshold b is valid when the new alph1 is not at the bounds,
 		    //because it forces the output of the SVM to be y1 when the input is vector X1.
 		}
@@ -398,7 +402,7 @@ int takeStep(int i1,int i2)
 				//b1 and b2.
 			}
 		}
-		delta_b=bnew-b;
+		delta_b=bnew-b;//b_new-b_old
 		b=bnew;
 	}
 	
@@ -410,6 +414,7 @@ int takeStep(int i1,int i2)
 		for(int i=0;i<end_support_i;i++)//对于所有的alph中的非边界位置 进行误差更新
 		{
 			if(0<alph[i]&&alph[i]<C)//非边界值 对应的E 看不懂 所谓的更新
+		    //此时alph还是更新前的
 			{
 				/*
 				Whenever a joint optimization occurs, the cached errors for all non-bound
@@ -418,7 +423,7 @@ int takeStep(int i1,int i2)
 				error_cache[i]+=t1*kernel_func(i1,i)+t2*(kernel_func(i2,i))-delta_b;
 			}
 		}
-		error_cache[i1]=0.0;
+		error_cache[i1]=0.0;//对于边界值不存在样本误差 因为向量为支持向量
 		error_cache[i2]=0.0;
 		/*
 		When a Lagrange multiplier is non-bound and is unvolved in a joint optimization,
@@ -442,6 +447,7 @@ double learned_func(int k)
 			s+=alph[i]*target[i]*kernel_func(i,k);
 		}
 	}
+	//这边b为阈值 是wT+b=0分割面的输出 我认为是这样的
 	s-=b;
 	return s;
 }
