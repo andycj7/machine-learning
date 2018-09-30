@@ -421,6 +421,10 @@ int takeStep(int i1,int i2)
 				multipliers alph[i] that are not involved in the optimization are updated.
 				*/
 				error_cache[i]+=t1*kernel_func(i1,i)+t2*(kernel_func(i2,i))-delta_b;
+				//(y1*alph1_new*k1i+y2*alph2_new*k2i-b_new)-(y1*alph1_old*k1i+y2*alph2_old*k2i-b_old)
+				//原来已经求得的支持向量在新模型和旧模型之间的差值
+				//用于作为原来支持向量 在新模型的误差 来作为查找位置的依据
+				//优先边界样本误差 相差最大 来作为启发式
 			}
 		}
 		error_cache[i1]=0.0;//对于边界值不存在样本误差 因为向量为支持向量
